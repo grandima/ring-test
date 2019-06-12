@@ -20,11 +20,12 @@ final class NetworkManager {
         urlComponents.host = "reddit.com"
         return urlComponents
     }()
-    func getTopPosts(before: String?, after: String?, count: Int? = 10, completion: @escaping(Result<Root, NetworkErrors>)->Void) {
+    func getTopPosts(before: String?, after: String?, count: Int = 20, completion: @escaping(Result<Root, NetworkErrors>)->Void) {
         var components = baseUrlComponents
+        
         components.queryItems = [URLQueryItem.init(name: "after", value: after),
                                  URLQueryItem.init(name: "before", value: before),
-                                 URLQueryItem.init(name: "count", value: count?.description)]
+                                 URLQueryItem.init(name: "count", value: count.description)]
         guard let url = components.url?.appendingPathComponent("top.json") else { return completion(.failure(.whileBuildingRequest)) }
         URLSession.shared.dataTask(with: url) { (data, response, error) in
             

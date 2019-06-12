@@ -8,36 +8,24 @@
 
 import UIKit
 
-class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class ViewController: UIViewController, UITableViewDelegate, PresenterOutput {
     @IBOutlet weak var tableView: UITableView!
     
-    var result: PresentationRoot? {
-        didSet {
-            tableView.reloadData()
-        }
-    }
+    private var presenter: Presenter!
     override func viewDidLoad() {
         super.viewDidLoad()
-        NetworkManager.init().getTopPosts(before: nil, after: nil) { (result) in
-            self.result = try? result.map({PresentationRoot.init(posts: $0.data, oldPosts: [])}).get()
-            
-        }
-        // Do any additional setup after loading the view.
-    }
-
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return result?.posts.count ?? 0
+        presenter = Presenter.init()
+        tableView.estimatedRowHeight = 100
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.dataSource = presenter
+        presenter.view = self
+        presenter.load()
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "TableViewCellIdentifier") as! TableViewCell
-        guard let post = result?.posts[indexPath.row] else { return cell }
-        cell.titleLabel.text = post.title
-        ImageManager.shared.getImage(for: post.thumbnail) { (image) in
-            cell.imageView?.image = image
-        }
-        return cell
+    func update() {
+        tableView.reloadData()
     }
+
 
 }
 

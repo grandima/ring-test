@@ -6,18 +6,25 @@
 //  Copyright © 2019 Dmytro Medynsky. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 struct PresentationPost: Codable {
+    enum CodingKeys: CodingKey {
+        case post
+    }
     private let post: Post
-    var title: String {
+    var image: UIImage?
+    var titleString: String {
         return post.title
     }
-    var authorName: String {
+    var authorString: String {
         return post.author
     }
     var commentsCountString: String {
         return String.init(post.commentsCount)
+    }
+    var timeString: String {
+        return post.created.convertToStringAgo()
     }
     var thumbnail: String {
         return String.init(post.thumbnail)

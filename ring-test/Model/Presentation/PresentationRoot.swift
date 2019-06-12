@@ -12,9 +12,15 @@ struct PresentationRoot: Codable {
     let posts: [PresentationPost]
     let after: String?
     let before: String?
-    init(posts: Root.Data, oldPosts: [PresentationPost]) {
+    
+    init() {
+        posts = []
+        after = nil
+        before = nil
+    }
+    init(posts: Root.Data, oldRoot: PresentationRoot) {
         self.after = posts.after
         self.before = posts.before
-        self.posts = oldPosts + posts.children.map({PresentationPost.init(post: $0.data)})
+        self.posts = oldRoot.posts + posts.children.map({PresentationPost.init(post: $0.data)})
     }
 }

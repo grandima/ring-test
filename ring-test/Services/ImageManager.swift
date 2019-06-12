@@ -10,7 +10,7 @@ import UIKit
 
 final class ImageManager {
     
-    static let shared = ImageManager.init()
+//    static let shared = ImageManager.init()
     
     private let imageCache = NSCache<NSString, UIImage>()
     private let workerQueue = DispatchQueue.init(label: "com.grandima.worker", attributes: .concurrent)
@@ -18,7 +18,7 @@ final class ImageManager {
     
     private let fileSystemStorage = FilesystemStorage.init()
     
-    private init() {}
+//    private init() {}
     
     
     func getImage(for urlString: String, completion: @escaping (UIImage?)->Void) {
