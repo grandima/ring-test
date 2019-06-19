@@ -19,15 +19,15 @@ class TableViewCell: UITableViewCell {
     
     @IBOutlet weak var timeLabel: UILabel!
     @IBOutlet weak var imgView: UIImageView!
-    var imageLongPressAction: ActionCompletion?
-    var imagePressAction: ActionCompletion?
+    var imageLongTapAction: ActionCompletion?
+    var imageTapAction: ActionCompletion?
     func populate(author: String = "", title: String = "", comments: String = "", time: String = "", image: UIImage?, longAction: ActionCompletion? = nil, shortAction: ActionCompletion? = nil) {
         authorLabel?.text = author
         titleLabel?.text = title
         commentsLabel?.text = comments
         timeLabel?.text = time
-        imageLongPressAction = longAction
-        imagePressAction = shortAction
+        imageLongTapAction = longAction
+        imageTapAction = shortAction
         imgView.image = image
     }
     func setup(with image: UIImage?) {
@@ -44,17 +44,25 @@ class TableViewCell: UITableViewCell {
         super.prepareForReuse()
         imgView.image = nil
         imgView.isHidden = false
-        
-    }
-    override func awakeFromNib() {
-        super.awakeFromNib()
-
     }
     
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        selectionStyle = .none
+        let tap = UITapGestureRecognizer(target: self, action:
+            #selector(imageTap))
+        tap.cancelsTouchesInView = false
+        let longTap = UILongPressGestureRecognizer(target: self, action:
+            #selector(imageLongTap))
+        imgView.addGestureRecognizer(longTap)
+        imgView.addGestureRecognizer(tap)
     }
-
+    
+    @objc func imageTap() {
+        imageTapAction?()
+    }
+    
+    @objc func imageLongTap() {
+        imageLongTapAction?()
+    }
 }

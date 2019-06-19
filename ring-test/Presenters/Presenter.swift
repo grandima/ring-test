@@ -39,7 +39,7 @@ final class Presenter: NSObject,  UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "TableViewCell", for: indexPath) as! TableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "TableViewCell") as! TableViewCell
         let post = getPost(for: indexPath)
         var openUrlClosure: (()->Void)?
         if let url = post.url, UIApplication.shared.canOpenURL(url) {
@@ -117,7 +117,9 @@ extension Presenter: UITableViewDataSourcePrefetching, UITableViewDelegate {
 extension Presenter: PresentationPostDelegate {
     func didUpdateImage(for post: PresentationPost) {
         if let index = result.posts.firstIndex(of: post), let cell = view?.getCell(at: index) as? TableViewCell {
-            cell.imgView.image = result.posts[index].image
+            cell.setup(with: result.posts[index].image)
+//            cell.imgView.image = result.posts[index].image
+            
         }
     }
 }
