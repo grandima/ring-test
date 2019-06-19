@@ -21,14 +21,14 @@ class TableViewCell: UITableViewCell {
     @IBOutlet weak var imgView: UIImageView!
     var imageLongPressAction: ActionCompletion?
     var imagePressAction: ActionCompletion?
-    func populate(author: String = "", title: String = "", comments: String = "", time: String = "", longAction: ActionCompletion? = nil, shortAction: ActionCompletion? = nil) {
+    func populate(author: String = "", title: String = "", comments: String = "", time: String = "", image: UIImage?, longAction: ActionCompletion? = nil, shortAction: ActionCompletion? = nil) {
         authorLabel?.text = author
         titleLabel?.text = title
         commentsLabel?.text = comments
         timeLabel?.text = time
         imageLongPressAction = longAction
         imagePressAction = shortAction
-
+        imgView.image = image
     }
     func setup(with image: UIImage?) {
         if let image = image {

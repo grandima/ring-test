@@ -23,4 +23,12 @@ struct PresentationRoot: Codable {
         self.before = posts.before
         self.posts = oldRoot.posts + posts.children.map({PresentationPost.init(post: $0.data)})
     }
+    init(posts: [PresentationPost], after: String?, before: String?) {
+        self.posts = posts
+        self.after = after
+        self.before = before
+    }
+    func createCopy(with posts: [PresentationPost]) -> PresentationRoot {
+        return .init(posts: posts, after: after, before: before)
+    }
 }

@@ -8,12 +8,20 @@
 
 import UIKit
 
-struct PresentationPost: Codable {
+protocol PresentationPostDelegate: class {
+    func didUpdateImage(for post: PresentationPost)
+}
+
+class PresentationPost: Codable {
     enum CodingKeys: CodingKey {
         case post
     }
     private let post: Post
-    var image: UIImage?
+    var image: UIImage? {
+        didSet {
+            delegate?.didUpdateImage(for: self)
+        }
+    }
     var titleString: String {
         return post.title
     }
@@ -29,14 +37,19 @@ struct PresentationPost: Codable {
     var thumbnail: String {
         return String.init(post.thumbnail)
     }
-    
+    var url: URL? {
+        return post.url
+    }
+    weak var delegate: PresentationPostDelegate?
     init(post: Post) {
         self.post = post
-//        self.title = post.title
-//        self.author = post.author
-//        self.commentsCount = post.commentsCount
-//        self.thumbnail = post.thumbnail
-//        self.url = post.url
-//        self.created = post.created
     }
+}
+
+extension PresentationPost: Equatable {
+    static func == (lhs: PresentationPost, rhs: PresentationPost) -> Bool {
+        return lhs.url == rhs.url
+    }
+    
+    
 }

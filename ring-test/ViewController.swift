@@ -18,6 +18,8 @@ class ViewController: UIViewController, UITableViewDelegate, PresenterOutput {
         tableView.estimatedRowHeight = 100
         tableView.rowHeight = UITableView.automaticDimension
         tableView.dataSource = presenter
+        tableView.delegate = presenter
+        tableView.prefetchDataSource = presenter
         presenter.view = self
         presenter.load()
     }
@@ -26,6 +28,9 @@ class ViewController: UIViewController, UITableViewDelegate, PresenterOutput {
         tableView.reloadData()
     }
 
-
+    func getCell(at index: Int) -> UITableViewCell? {
+        let indexPath = IndexPath.init(row: index, section: 0)
+        return tableView.cellForRow(at: indexPath)
+    }
 }
 

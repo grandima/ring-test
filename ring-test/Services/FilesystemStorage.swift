@@ -9,7 +9,7 @@
 import UIKit
 
 final class FilesystemStorage {
-    private let fsQueue = DispatchQueue.init(label: "com.grandima.fs", attributes: .concurrent)
+    private static let fsQueue = DispatchQueue.init(label: "com.grandima.fs", attributes: .concurrent)
     
     private let dictStorage = FilesystemCodable<[String: String]>(initialValue: [:])
     
@@ -31,12 +31,11 @@ final class FilesystemStorage {
         } else {
             folderName = ""
         }
-        
     }
     
     func getImage(for urlKey: String) -> UIImage? {
-        guard let fileKey = dictStorage.value[urlKey] else { return nil }
-        return fsQueue.sync {
+        return FilesystemStorage.fsQueue.sync {
+            guard let fileKey = dictStorage.value[urlKey] else { return nil }
             let newUrlString = URL.init(fileURLWithPath: folderName).appendingPathComponent(fileKey)
             var image: UIImage?
             if let data = try? Data.init(contentsOf: newUrlString) {
@@ -49,7 +48,7 @@ final class FilesystemStorage {
     func save(data: Data, for urlKey: String) {
         let fileKey = UUID.init().uuidString
         let url = URL.init(fileURLWithPath: folderName).appendingPathComponent(fileKey)
-        self.fsQueue.async(flags: .barrier, execute: {
+        FilesystemStorage.fsQueue.async(flags: .barrier, execute: {
             var dict = self.dictStorage.value
             dict[urlKey] = fileKey
             self.dictStorage.value = dict

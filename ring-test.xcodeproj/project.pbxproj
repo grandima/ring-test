@@ -11,11 +11,11 @@
 		8136429322AC43F6007B5BD0 /* PresentationRoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8136429222AC43F6007B5BD0 /* PresentationRoot.swift */; };
 		8136429522AC4409007B5BD0 /* PresentationPost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8136429422AC4409007B5BD0 /* PresentationPost.swift */; };
 		8136429822AD576F007B5BD0 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8136429722AD576F007B5BD0 /* NetworkManager.swift */; };
-		8136429A22AD6174007B5BD0 /* ImageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8136429922AD6174007B5BD0 /* ImageManager.swift */; };
 		813642A022AEA52A007B5BD0 /* FilesystemCodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8136429F22AEA52A007B5BD0 /* FilesystemCodable.swift */; };
 		813642A222AEA877007B5BD0 /* FilesystemStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 813642A122AEA877007B5BD0 /* FilesystemStorage.swift */; };
 		813642A722B12BA2007B5BD0 /* Date.swift in Sources */ = {isa = PBXBuildFile; fileRef = 813642A622B12BA2007B5BD0 /* Date.swift */; };
 		813642AA22B18BEA007B5BD0 /* Presenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 813642A922B18BEA007B5BD0 /* Presenter.swift */; };
+		813642B322B6C25B007B5BD0 /* ImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 813642B222B6C25B007B5BD0 /* ImageLoader.swift */; };
 		81E07A7722A2953C005E3A52 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81E07A7622A2953C005E3A52 /* AppDelegate.swift */; };
 		81E07A7922A2953C005E3A52 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81E07A7822A2953C005E3A52 /* ViewController.swift */; };
 		81E07A7C22A2953C005E3A52 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81E07A7A22A2953C005E3A52 /* Main.storyboard */; };
@@ -30,11 +30,11 @@
 		8136429222AC43F6007B5BD0 /* PresentationRoot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationRoot.swift; sourceTree = "<group>"; };
 		8136429422AC4409007B5BD0 /* PresentationPost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationPost.swift; sourceTree = "<group>"; };
 		8136429722AD576F007B5BD0 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
-		8136429922AD6174007B5BD0 /* ImageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageManager.swift; sourceTree = "<group>"; };
 		8136429F22AEA52A007B5BD0 /* FilesystemCodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilesystemCodable.swift; sourceTree = "<group>"; };
 		813642A122AEA877007B5BD0 /* FilesystemStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilesystemStorage.swift; sourceTree = "<group>"; };
 		813642A622B12BA2007B5BD0 /* Date.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Date.swift; sourceTree = "<group>"; };
 		813642A922B18BEA007B5BD0 /* Presenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Presenter.swift; sourceTree = "<group>"; };
+		813642B222B6C25B007B5BD0 /* ImageLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageLoader.swift; sourceTree = "<group>"; };
 		81E07A7322A2953C005E3A52 /* ring-test.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ring-test.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		81E07A7622A2953C005E3A52 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		81E07A7822A2953C005E3A52 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -70,9 +70,9 @@
 			isa = PBXGroup;
 			children = (
 				8136429722AD576F007B5BD0 /* NetworkManager.swift */,
-				8136429922AD6174007B5BD0 /* ImageManager.swift */,
 				813642A122AEA877007B5BD0 /* FilesystemStorage.swift */,
 				8136429F22AEA52A007B5BD0 /* FilesystemCodable.swift */,
+				813642B222B6C25B007B5BD0 /* ImageLoader.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -112,10 +112,10 @@
 		81E07A7522A2953C005E3A52 /* ring-test */ = {
 			isa = PBXGroup;
 			children = (
-				813642A822B18BD9007B5BD0 /* Presenters */,
 				813642A522B12B92007B5BD0 /* Extensions */,
 				8136429622AD574F007B5BD0 /* Services */,
 				81E07A8B22A427F4005E3A52 /* Model */,
+				813642A822B18BD9007B5BD0 /* Presenters */,
 				81E07A8822A2962C005E3A52 /* Views */,
 				81E07A7622A2953C005E3A52 /* AppDelegate.swift */,
 				81E07A7822A2953C005E3A52 /* ViewController.swift */,
@@ -225,9 +225,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				8136429022AC40D8007B5BD0 /* Post.swift in Sources */,
+				813642B322B6C25B007B5BD0 /* ImageLoader.swift in Sources */,
 				8136429522AC4409007B5BD0 /* PresentationPost.swift in Sources */,
 				8136429322AC43F6007B5BD0 /* PresentationRoot.swift in Sources */,
-				8136429A22AD6174007B5BD0 /* ImageManager.swift in Sources */,
 				813642A222AEA877007B5BD0 /* FilesystemStorage.swift in Sources */,
 				813642A022AEA52A007B5BD0 /* FilesystemCodable.swift in Sources */,
 				81E07A8A22A29671005E3A52 /* TableViewCell.swift in Sources */,
