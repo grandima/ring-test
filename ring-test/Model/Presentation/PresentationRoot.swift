@@ -21,7 +21,7 @@ struct PresentationRoot: Codable {
     init(posts: Root.Data, oldRoot: PresentationRoot) {
         self.after = posts.after
         self.before = posts.before
-        self.posts = oldRoot.posts + posts.children.map({PresentationPost.init(post: $0.data)})
+        self.posts = oldRoot.posts + posts.children.map({.init(post: $0.data)})
     }
     init(posts: [PresentationPost], after: String?, before: String?) {
         self.posts = posts

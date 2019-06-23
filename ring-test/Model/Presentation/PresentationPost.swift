@@ -29,7 +29,7 @@ class PresentationPost: Codable {
         return post.author
     }
     var commentsCountString: String {
-        return String.init(post.commentsCount)
+        return post.commentsCount.description + " comments"
     }
     var timeString: String {
         return post.created.convertToStringAgo()
