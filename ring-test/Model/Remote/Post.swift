@@ -30,7 +30,6 @@ extension Post: Codable {
     
     init(from decoder: Decoder) throws {
         let data = try decoder.container(keyedBy: CodingKeys.self)
-        
         title = try data.decode(String.self, forKey: .title)
         author = try data.decode(String.self, forKey: .author)
         thumbnail = try data.decode(String.self, forKey: .thumbnail)

@@ -11,35 +11,14 @@ import UIKit
 class TableViewCell: UITableViewCell {
 
     typealias ActionCompletion = ()->Void
-    @IBOutlet weak var authorLabel: UILabel!
+    @IBOutlet private weak var authorLabel: UILabel!
+    @IBOutlet private weak var titleLabel: UILabel!
+    @IBOutlet private weak var commentsLabel: UILabel!
+    @IBOutlet private weak var timeLabel: UILabel!
+    @IBOutlet private weak var imgView: UIImageView!
+    private var imageLongTapAction: ActionCompletion?
+    private var imageTapAction: ActionCompletion?
     
-    @IBOutlet weak var titleLabel: UILabel!
-    
-    @IBOutlet weak var commentsLabel: UILabel!
-    
-    @IBOutlet weak var timeLabel: UILabel!
-    @IBOutlet weak var imgView: UIImageView!
-    var imageLongTapAction: ActionCompletion?
-    var imageTapAction: ActionCompletion?
-    func populate(author: String = "", title: String = "", comments: String = "", time: String = "", image: UIImage?, longAction: ActionCompletion? = nil, shortAction: ActionCompletion? = nil) {
-        authorLabel?.text = author
-        titleLabel?.text = title
-        commentsLabel?.text = comments
-        timeLabel?.text = time
-        imageLongTapAction = longAction
-        imageTapAction = shortAction
-        imgView.image = image
-    }
-    func setup(with image: UIImage?) {
-        if let image = image {
-            imgView.image = image
-            imgView.isHidden = false
-        } else {
-            imgView.image = nil
-            imgView.isHidden = true
-        }
-        
-    }
     override func prepareForReuse() {
         super.prepareForReuse()
         imgView.image = nil
@@ -58,11 +37,33 @@ class TableViewCell: UITableViewCell {
         imgView.addGestureRecognizer(tap)
     }
     
-    @objc func imageTap() {
+    @objc private func imageTap() {
         imageTapAction?()
     }
     
-    @objc func imageLongTap() {
+    @objc private func imageLongTap() {
         imageLongTapAction?()
+    }
+}
+
+extension TableViewCell: CellView {
+    func populate(author: String = "", title: String = "", comments: String = "", time: String = "", image: UIImage?, longAction: ActionCompletion? = nil, shortAction: ActionCompletion? = nil) {
+        authorLabel.text = author
+        titleLabel.text = title
+        commentsLabel.text = comments
+        timeLabel.text = time
+        imageLongTapAction = longAction
+        imageTapAction = shortAction
+        imgView.image = image
+    }
+    func setup(with image: UIImage?) {
+        if let image = image {
+            imgView.image = image
+            imgView.isHidden = false
+        } else {
+            imgView.image = nil
+            imgView.isHidden = true
+        }
+        
     }
 }

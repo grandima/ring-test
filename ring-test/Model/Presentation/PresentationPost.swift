@@ -13,34 +13,42 @@ protocol PresentationPostDelegate: class {
 }
 
 class PresentationPost: Codable {
-    enum CodingKeys: CodingKey {
+    private enum CodingKeys: CodingKey {
         case post
     }
-    private let post: Post
     var image: UIImage? {
         didSet {
             delegate?.didUpdateImage(for: self)
         }
     }
+    
     var titleString: String {
         return post.title
     }
+    
     var authorString: String {
         return post.author
     }
+    
     var commentsCountString: String {
         return post.commentsCount.description + " comments"
     }
+    
     var timeString: String {
         return post.created.convertToStringAgo()
     }
-    var thumbnail: String {
-        return String.init(post.thumbnail)
+    
+    var thumbnailString: String {
+        return post.thumbnail
     }
+    
     var url: URL? {
         return post.url
     }
+    
     weak var delegate: PresentationPostDelegate?
+    
+    private let post: Post
     init(post: Post) {
         self.post = post
     }

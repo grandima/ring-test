@@ -9,26 +9,19 @@
 import Foundation
 
 struct PresentationRoot: Codable {
+    var lastVisibleRow: Int?
     let posts: [PresentationPost]
     let after: String?
-    let before: String?
-    
     init() {
         posts = []
         after = nil
-        before = nil
     }
     init(posts: Root.Data, oldRoot: PresentationRoot) {
         self.after = posts.after
-        self.before = posts.before
         self.posts = oldRoot.posts + posts.children.map({.init(post: $0.data)})
     }
-    init(posts: [PresentationPost], after: String?, before: String?) {
+    init(posts: [PresentationPost], after: String?) {
         self.posts = posts
         self.after = after
-        self.before = before
-    }
-    func createCopy(with posts: [PresentationPost]) -> PresentationRoot {
-        return .init(posts: posts, after: after, before: before)
     }
 }

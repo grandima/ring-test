@@ -9,79 +9,42 @@
 import UIKit
 
 protocol PresenterOutput: class {
-    func update()
-    func getCell(at index: Int) -> UITableViewCell?
-    func present(with image: UIImage)
+    func updateView()
+    func getCellView(at index: Int) -> CellView?
+    func presentSharingExtension(for image: UIImage)
 }
 
-final class Presenter: NSObject {
+final class Presenter {
     
-    weak var view: PresenterOutput!
-    
-    var dataModel: Data? {
-        get {
-            var data: Data?
-            if !result.posts.isEmpty {
-                data = try? JSONEncoder.init().encode(result)
-            }
-            return data
-        }
-        set {
-            if let data = newValue,
-                let newModel = try? JSONDecoder.init().decode(PresentationRoot.self, from: data) {
-                result = newModel
-            }
-        }
+    private(set) var lastVisibleRow: Int? {
+        get { return result.lastVisibleRow }
+        set { result.lastVisibleRow = newValue }
     }
     
     private(set) var result = PresentationRoot.init() {
         didSet {
             result.posts.forEach({$0.delegate = self})
-            view?.update()
+            view?.updateView()
         }
     }
     private let imageManager = ImageLoader.init()
     private let networkManager = NetworkManager.init()
     private var isLoading = false
+    private weak var view: PresenterOutput!
     
-    func load() {
-        networkManager.getTopPosts(after: nil, count: nil) {[unowned self] (result) in
-            self.result = (try? result.map({PresentationRoot.init(posts: $0.data, oldRoot: .init())}).get()) ?? .init()
-        }
+    init(view: PresenterOutput) {
+        self.view = view
     }
     
-    func willDisplayCell(at indexPath: IndexPath) {
-        if indexPath.row == result.posts.count - 1 {
-            handlePagination()
-        }
+    private func getPost(for index: Int) -> PresentationPost {
+        return result.posts[index]
     }
     
-    fileprivate func getPost(for indexPath: IndexPath) -> PresentationPost {
-        return result.posts[indexPath.row]
-    }
-    
-    fileprivate func loadImage(for post: PresentationPost) {
+    private func loadImage(for post: PresentationPost) {
         guard nil == post.image else { return }
-        imageManager.load(for: post.thumbnail, completion: { [unowned post](image) in
+        imageManager.load(for: post.thumbnailString, completion: { [unowned post](image) in
             post.image = image
         })
-    }
-    
-    fileprivate func prefetchImages(at indexPaths: [IndexPath]) {
-        indexPaths.forEach { (indexPath) in
-            let post = getPost(for: indexPath)
-            guard nil == post.image else { return }
-            imageManager.load(for: post.thumbnail, completion: { [unowned post](image) in
-                post.image = image
-            })
-        }
-    }
-    
-    fileprivate func cancelPrefetching(at indexPaths: [IndexPath]) {
-        indexPaths.forEach { (indexPath) in
-            let post = getPost(for: indexPath)
-            imageManager.cancel(with: post.thumbnail)
-        }
     }
     
     private func handlePagination() {
@@ -99,16 +62,22 @@ final class Presenter: NSObject {
     private func open(url: URL) {
         UIApplication.shared.open(url, options: [:], completionHandler: nil)
     }
+    
 }
 
-extension Presenter: UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+extension Presenter: PresenterProtocol {
+    var numberOfRows: Int {
         return result.posts.count
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "TableViewCell") as! TableViewCell
-        let post = getPost(for: indexPath)
+    func load() {
+        networkManager.getTopPosts(after: nil, count: nil) {[unowned self] (result) in
+            self.result = (try? result.map({PresentationRoot.init(posts: $0.data, oldRoot: .init())}).get()) ?? .init()
+        }
+    }
+    
+    func configure(cell: CellView, for index: Int) {
+        let post = getPost(for: index)
         var shortAction: (()->Void)?
         if let url = post.url, UIApplication.shared.canOpenURL(url) {
             shortAction = {  [unowned self] in
@@ -118,33 +87,64 @@ extension Presenter: UITableViewDataSource {
         var longAction: (()->Void)?
         longAction = {  [unowned self, unowned post] in
             if let image = post.image {
-                self.view.present(with: image)
+                self.view?.presentSharingExtension(for: image)
             }
         }
         if nil == post.image {
             loadImage(for: post)
         }
         cell.populate(author: post.authorString, title: post.titleString, comments: post.commentsCountString, time: post.timeString, image: post.image, longAction: longAction, shortAction: shortAction)
-        return cell
-    }
-}
-
-extension Presenter: UITableViewDataSourcePrefetching  {
-    
-    func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
-        prefetchImages(at: indexPaths)
     }
     
-    func tableView(_ tableView: UITableView, cancelPrefetchingForRowsAt indexPaths: [IndexPath]) {
-        cancelPrefetching(at: indexPaths)
+    func viewWillAppear() {
+        if lastVisibleRow == nil {
+            load()
+        }
+    }
+    
+    func willDisplayCell(at index: Int) {
+        if index == result.posts.count - 1 {
+            handlePagination()
+        }
+    }
+    
+    func prefetch(for indices: [Int]) {
+        indices.forEach { (index) in
+            let post = getPost(for: index)
+            guard nil == post.image else { return }
+            imageManager.load(for: post.thumbnailString, completion: { [unowned post](image) in
+                post.image = image
+            })
+        }
+    }
+    
+    func cancelPrefetching(for indices: [Int]) {
+        indices.forEach { (index) in
+            let post = getPost(for: index)
+            imageManager.cancel(with: post.thumbnailString)
+        }
+    }
+    
+    var encodedData: Data? {
+        var data: Data?
+        if !result.posts.isEmpty {
+            data = try? JSONEncoder.init().encode(result)
+        }
+        return data
+    }
+    
+    func decode(data: Data) {
+        if let newModel = try? JSONDecoder.init().decode(PresentationRoot.self, from: data) {
+            result = newModel
+        }
     }
 }
 
 extension Presenter: PresentationPostDelegate {
     func didUpdateImage(for post: PresentationPost) {
-        if let index = result.posts.firstIndex(of: post), let cell = view?.getCell(at: index) as? TableViewCell {
+        if let index = result.posts.firstIndex(of: post),
+            let cell = view?.getCellView(at: index) {
             cell.setup(with: result.posts[index].image)
-//            cell.imgView.image = result.posts[index].image
         }
     }
 }

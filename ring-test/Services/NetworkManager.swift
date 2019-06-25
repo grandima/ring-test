@@ -24,7 +24,7 @@ final class NetworkManager {
         var components = baseUrlComponents
         
         components.queryItems = [URLQueryItem.init(name: "after", value: after),
-                                 URLQueryItem.init(name: "count", value: (count ?? 0).description)]
+                                 URLQueryItem.init(name: "count", value: count?.description)]
         guard let url = components.url?.appendingPathComponent("top.json") else { return completion(.failure(.whileBuildingRequest)) }
         URLSession.shared.dataTask(with: url) { (data, response, error) in
             

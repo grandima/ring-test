@@ -15,7 +15,6 @@ struct Root: Decodable {
         }
         let children: [Child]
         let after: String?
-        let before: String?
     }
     let data: Data
 }

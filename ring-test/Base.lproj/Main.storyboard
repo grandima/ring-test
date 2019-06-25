@@ -104,7 +104,9 @@
                                     </tableViewCell>
                                 </prototypes>
                                 <connections>
+                                    <outlet property="dataSource" destination="BYZ-38-t0r" id="9eY-KL-eNk"/>
                                     <outlet property="delegate" destination="BYZ-38-t0r" id="zG7-gy-azV"/>
+                                    <outlet property="prefetchDataSource" destination="BYZ-38-t0r" id="t8g-AG-5ht"/>
                                 </connections>
                             </tableView>
                         </subviews>
