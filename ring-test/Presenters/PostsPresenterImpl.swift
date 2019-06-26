@@ -1,5 +1,5 @@
 //
-//  Presenter.swift
+//  PostsPresenter.swift
 //  ring-test
 //
 //  Created by Dmytro Medynsky on 6/12/19.
@@ -8,80 +8,82 @@
 
 import UIKit
 
-protocol PresenterOutput: class {
-    func updateView()
-    func getCellView(at index: Int) -> CellView?
+protocol PostsView: class {
+    func update()
+    func getCellView(at index: Int) -> PostCellView?
     func presentSharingExtension(for image: UIImage)
+    func open(url: URL)
 }
 
-final class Presenter {
+final class PostsPresenterImpl {
     
     private(set) var lastVisibleRow: Int? {
         get { return result.lastVisibleRow }
         set { result.lastVisibleRow = newValue }
     }
     
-    private(set) var result = PresentationRoot.init() {
+    private(set) var result = RootViewModel.init() {
         didSet {
             result.posts.forEach({$0.delegate = self})
-            view?.updateView()
+            view?.update()
         }
     }
-    private let imageManager = ImageLoader.init()
-    private let networkManager = NetworkManager.init()
+    private let imageManager: ImageLoadable
+    private let networkManager: PostsLoadable
     private var isLoading = false
-    private weak var view: PresenterOutput!
+    private weak var view: PostsView?
     
-    init(view: PresenterOutput) {
+    init(view: PostsView, imageManager: ImageLoadable, networkManager: PostsLoadable) {
         self.view = view
+        self.imageManager = imageManager
+        self.networkManager = networkManager
     }
     
-    private func getPost(for index: Int) -> PresentationPost {
+    private func getPost(for index: Int) -> PostViewModel {
         return result.posts[index]
     }
     
-    private func loadImage(for post: PresentationPost) {
+    private func loadImage(for post: PostViewModel) {
         guard nil == post.image else { return }
         imageManager.load(for: post.thumbnailString, completion: { [unowned post](image) in
             post.image = image
         })
     }
     
-    private func handlePagination() {
-        guard let after = result.after, !isLoading else { return }
-        let count = result.posts.count
-        isLoading = true
-        networkManager.getTopPosts(after: after, count: count) {[unowned self] (result) in
-            self.isLoading = false
-            if case .success(let root) = result {
-                self.result = PresentationRoot.init(posts: root.data, oldRoot: self.result)
-            }
+    private func getTopPosts(isNext: Bool = false) {
+        guard !isLoading else { return }
+        var after: String?
+        var count: Int?
+        if isNext {
+            guard result.after != nil else { return }
+            after = result.after
+            count = result.posts.count
         }
-    }
-
-    private func open(url: URL) {
-        UIApplication.shared.open(url, options: [:], completionHandler: nil)
+        isLoading = true
+        networkManager.getTopPosts(after: after, count: count) { [weak self](result) in
+            guard let self = self else { return }
+            self.isLoading = false
+            self.result = (try? result.map({RootViewModel.init(posts: $0.data, oldRoot: (isNext ? self.result : .init()))}).get()) ?? self.result
+        }
     }
     
 }
 
-extension Presenter: PresenterProtocol {
+extension PostsPresenterImpl: PostsPresenter {
     var numberOfRows: Int {
         return result.posts.count
     }
     
     func load() {
-        networkManager.getTopPosts(after: nil, count: nil) {[unowned self] (result) in
-            self.result = (try? result.map({PresentationRoot.init(posts: $0.data, oldRoot: .init())}).get()) ?? .init()
-        }
+        getTopPosts()
     }
     
-    func configure(cell: CellView, for index: Int) {
+    func configure(cell: PostCellView, for index: Int) {
         let post = getPost(for: index)
         var shortAction: (()->Void)?
         if let url = post.url, UIApplication.shared.canOpenURL(url) {
             shortAction = {  [unowned self] in
-                self.open(url: url)
+                self.view?.open(url: url)
             }
         }
         var longAction: (()->Void)?
@@ -104,7 +106,7 @@ extension Presenter: PresenterProtocol {
     
     func willDisplayCell(at index: Int) {
         if index == result.posts.count - 1 {
-            handlePagination()
+            getTopPosts(isNext: true)
         }
     }
     
@@ -121,11 +123,12 @@ extension Presenter: PresenterProtocol {
     func cancelPrefetching(for indices: [Int]) {
         indices.forEach { (index) in
             let post = getPost(for: index)
-            imageManager.cancel(with: post.thumbnailString)
+            imageManager.cancel(for: post.thumbnailString)
         }
     }
     
-    var encodedData: Data? {
+    func getEncodedData(with lastVisibleIndex: Int?) -> Data? {
+        result.lastVisibleRow = lastVisibleIndex
         var data: Data?
         if !result.posts.isEmpty {
             data = try? JSONEncoder.init().encode(result)
@@ -134,14 +137,14 @@ extension Presenter: PresenterProtocol {
     }
     
     func decode(data: Data) {
-        if let newModel = try? JSONDecoder.init().decode(PresentationRoot.self, from: data) {
+        if let newModel = try? JSONDecoder.init().decode(RootViewModel.self, from: data) {
             result = newModel
         }
     }
 }
 
-extension Presenter: PresentationPostDelegate {
-    func didUpdateImage(for post: PresentationPost) {
+extension PostsPresenterImpl: PostViewModelDelegate {
+    func didUpdateImage(for post: PostViewModel) {
         if let index = result.posts.firstIndex(of: post),
             let cell = view?.getCellView(at: index) {
             cell.setup(with: result.posts[index].image)

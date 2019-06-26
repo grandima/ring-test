@@ -11,10 +11,10 @@ import UIKit
 protocol ImageLoadable {
     typealias ImageCompletion = ((UIImage?) -> Void)
     func load(for urlString: String, completion: @escaping ImageCompletion)
-    func cancel(with urlString: String)
+    func cancel(for urlString: String)
 }
 
-class ImageLoader: ImageLoadable {
+final class ImageLoader: ImageLoadable {
     
     private let imageCache = NSCache<NSString, UIImage>()
     private let fileSystemStorage = FilesystemStorage.init()
@@ -44,7 +44,7 @@ class ImageLoader: ImageLoadable {
         }
     }
     
-    func cancel(with urlString: String) {
+    func cancel(for urlString: String) {
         guard let taskIndex = tasks.firstIndex(where: { $0.originalRequest?.url?.absoluteString == urlString }) else {
             return
         }

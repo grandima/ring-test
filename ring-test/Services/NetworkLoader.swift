@@ -1,5 +1,5 @@
 //
-//  NetworkManager.swift
+//  NetworkLoader.swift
 //  ring-test
 //
 //  Created by Dmytro Medynsky on 6/9/19.
@@ -8,19 +8,25 @@
 
 import Foundation
 
-final class NetworkManager {
-    enum NetworkErrors: Error {
-        case whileBuildingRequest
-        case network(Error)
-        case parsing(Error)
-    }
+protocol PostsLoadable {
+    func getTopPosts(after: String?, count: Int?, completion: @escaping(Result<Root, NetworkErrors>)->Void)
+}
+
+enum NetworkErrors: Error {
+    case whileBuildingRequest
+    case network(Error)
+    case parsing(Error)
+}
+
+final class NetworkLoader: PostsLoadable {
     private let baseUrlComponents: URLComponents = {
         var urlComponents = URLComponents()
         urlComponents.scheme = "https"
         urlComponents.host = "reddit.com"
         return urlComponents
     }()
-    func getTopPosts(after: String? = nil, count: Int? = nil, completion: @escaping(Result<Root, NetworkErrors>)->Void) {
+
+    func getTopPosts(after: String?, count: Int?, completion: @escaping (Result<Root, NetworkErrors>) -> Void) {
         var components = baseUrlComponents
         
         components.queryItems = [URLQueryItem.init(name: "after", value: after),
@@ -44,7 +50,7 @@ final class NetworkManager {
                     }
                 }
             }
-        }.resume()
+            }.resume()
     }
     
 }

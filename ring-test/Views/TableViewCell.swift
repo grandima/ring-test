@@ -46,7 +46,7 @@ class TableViewCell: UITableViewCell {
     }
 }
 
-extension TableViewCell: CellView {
+extension TableViewCell: PostCellView {
     func populate(author: String = "", title: String = "", comments: String = "", time: String = "", image: UIImage?, longAction: ActionCompletion? = nil, shortAction: ActionCompletion? = nil) {
         authorLabel.text = author
         titleLabel.text = title

@@ -1,5 +1,5 @@
 //
-//  PresentationPost.swift
+//  PostViewModel.swift
 //  ring-test
 //
 //  Created by Dmytro Medynsky on 6/8/19.
@@ -8,11 +8,11 @@
 
 import UIKit
 
-protocol PresentationPostDelegate: class {
-    func didUpdateImage(for post: PresentationPost)
+protocol PostViewModelDelegate: class {
+    func didUpdateImage(for post: PostViewModel)
 }
 
-class PresentationPost: Codable {
+class PostViewModel: Codable {
     private enum CodingKeys: CodingKey {
         case post
     }
@@ -46,7 +46,7 @@ class PresentationPost: Codable {
         return post.url
     }
     
-    weak var delegate: PresentationPostDelegate?
+    weak var delegate: PostViewModelDelegate?
     
     private let post: Post
     init(post: Post) {
@@ -54,8 +54,8 @@ class PresentationPost: Codable {
     }
 }
 
-extension PresentationPost: Equatable {
-    static func == (lhs: PresentationPost, rhs: PresentationPost) -> Bool {
+extension PostViewModel: Equatable {
+    static func == (lhs: PostViewModel, rhs: PostViewModel) -> Bool {
         return lhs.url == rhs.url
     }
     

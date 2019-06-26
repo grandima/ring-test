@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  PostsViewController.swift
 //  ring-test
 //
 //  Created by Dmytro Medynsky on 6/1/19.
@@ -8,34 +8,35 @@
 
 import UIKit
 
-protocol CellView: class {
+protocol PostCellView: class {
     func populate(author: String, title: String, comments: String, time: String, image: UIImage?, longAction: (()->Void)?, shortAction: (()->Void)?)
     func setup(with image: UIImage?)
 }
 
-protocol PresenterProtocol: class {
+protocol PostsPresenter: class {
     var numberOfRows: Int { get }
     func load()
-    func configure(cell: CellView, for index: Int)
+    func configure(cell: PostCellView, for index: Int)
     func viewWillAppear()
     
     func willDisplayCell(at index: Int)
     func prefetch(for indices: [Int])
     func cancelPrefetching(for indices: [Int])
-    
-    var encodedData: Data? { get }
+    func getEncodedData(with lastVisibleIndex: Int?) -> Data?
     func decode(data: Data)
     var lastVisibleRow: Int? { get }
     
 }
 
-class ViewController: UIViewController {
-    @IBOutlet fileprivate weak var tableView: UITableView!
-    var presenter: PresenterProtocol! = Presenter.init()
+class PostsViewController: UIViewController {
+    var configurator: PostsConfigurable = PostsConfigurator.init()
+    @IBOutlet private weak var tableView: UITableView!
+    var presenter: PostsPresenter!
     private let refreshControl = UIRefreshControl()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        configurator.configure(viewController: self)
         configureTableView()
     }
     
@@ -65,7 +66,7 @@ class ViewController: UIViewController {
     }
 }
 
-extension ViewController: UITableViewDataSource {
+extension PostsViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return presenter.numberOfRows
     }
@@ -77,7 +78,7 @@ extension ViewController: UITableViewDataSource {
     }
 }
 
-extension ViewController: UITableViewDataSourcePrefetching {
+extension PostsViewController: UITableViewDataSourcePrefetching {
     func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
         presenter.prefetch(for: indexPaths.map({$0.row}))
     }
@@ -87,19 +88,19 @@ extension ViewController: UITableViewDataSourcePrefetching {
     }
 }
 
-extension ViewController: UITableViewDelegate {
+extension PostsViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         presenter.willDisplayCell(at: indexPath.row)
     }
 }
 
-extension ViewController: PresenterOutput {
-    func updateView() {
+extension PostsViewController: PostsView {
+    func update() {
         tableView.reloadData()
         refreshControl.endRefreshing()
     }
     
-    func getCellView(at index: Int) -> CellView? {
+    func getCellView(at index: Int) -> PostCellView? {
         let indexPath = IndexPath.init(row: index, section: 0)
         return tableView.cellForRow(at: indexPath) as? TableViewCell
     }
@@ -108,29 +109,23 @@ extension ViewController: PresenterOutput {
         let vc = UIActivityViewController(activityItems: [image], applicationActivities: [])
         present(vc, animated: true)
     }
+    func open(url: URL) {
+        UIApplication.shared.open(url, options: [:], completionHandler: nil)
+    }
 }
 
-extension ViewController {
+extension PostsViewController {
     override func encodeRestorableState(with coder: NSCoder) {
         super.encodeRestorableState(with: coder)
-        coder.encode(presenter.encodedData, forKey: description)
-//        let data = presenter.dataModel
-//        coder.encode(data, forKey: "response")
-//        if let indexPath = tableView.indexPathsForVisibleRows?.last {
-//            coder.encode(indexPath.row, forKey: "currentRow")
-//        }
+        
+        coder.encode(presenter.getEncodedData(with: tableView.indexPathsForVisibleRows?.last?.row), forKey: "encoded")
     }
     
     override func decodeRestorableState(with coder: NSCoder) {
         super.decodeRestorableState(with: coder)
-        if let data = coder.decodeObject(forKey: description) as? Data {
+        if let data = coder.decodeObject(forKey: "encoded") as? Data {
             presenter.decode(data: data)
         }
-//        if let data = coder.decodeObject(forKey: "response") as? Data {
-//            let row = coder.decodeInteger(forKey: "currentRow")
-//            lastVisibleRow = row
-//            presenter.dataModel = data
-//        }
     }
     
     override func applicationFinishedRestoringState() {

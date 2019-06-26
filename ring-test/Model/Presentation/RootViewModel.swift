@@ -8,19 +8,19 @@
 
 import Foundation
 
-struct PresentationRoot: Codable {
+struct RootViewModel: Codable {
     var lastVisibleRow: Int?
-    let posts: [PresentationPost]
+    let posts: [PostViewModel]
     let after: String?
     init() {
         posts = []
         after = nil
     }
-    init(posts: Root.Data, oldRoot: PresentationRoot) {
+    init(posts: Root.Data, oldRoot: RootViewModel) {
         self.after = posts.after
         self.posts = oldRoot.posts + posts.children.map({.init(post: $0.data)})
     }
-    init(posts: [PresentationPost], after: String?) {
+    init(posts: [PostViewModel], after: String?) {
         self.posts = posts
         self.after = after
     }
