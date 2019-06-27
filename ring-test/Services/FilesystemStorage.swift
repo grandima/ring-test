@@ -12,7 +12,6 @@ final class FilesystemStorage {
     private static let fsQueue = DispatchQueue.init(label: "com.grandima.fs", attributes: .concurrent)
     
     private let dictStorage = FilesystemCodable<[String: String]>(initialValue: [:])
-    
     private let folderName: String
     
     init() {
