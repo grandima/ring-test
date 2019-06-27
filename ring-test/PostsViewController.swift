@@ -8,30 +8,22 @@
 
 import UIKit
 
-protocol PostCellView: class {
-    func populate(author: String, title: String, comments: String, time: String, image: UIImage?, longAction: (()->Void)?, shortAction: (()->Void)?)
-    func setup(with image: UIImage?)
+protocol PostsView: class {
+    func update()
+    func getCellView(at index: Int) -> PostCellView?
+    func presentSharingExtension(for image: UIImage)
+    func open(url: URL)
 }
 
-protocol PostsPresenter: class {
-    var numberOfRows: Int { get }
-    func load()
-    func configure(cell: PostCellView, for index: Int)
-    func viewWillAppear()
-    
-    func willDisplayCell(at index: Int)
-    func prefetch(for indices: [Int])
-    func cancelPrefetching(for indices: [Int])
-    func getEncodedData(with lastVisibleIndex: Int?) -> Data?
-    func decode(data: Data)
-    var lastVisibleRow: Int? { get }
-    
+protocol PostCellView: class {
+    func populate(author: String, title: String, comments: String, time: String, image: UIImage?, longAction: (()->Void)?, shortAction: (()->Void)?)
+    func update(with image: UIImage?)
 }
 
 class PostsViewController: UIViewController {
-    var configurator: PostsConfigurable = PostsConfigurator.init()
-    @IBOutlet private weak var tableView: UITableView!
+    var configurator: PostsConfigurable! = PostsConfigurator.init()
     var presenter: PostsPresenter!
+    @IBOutlet private weak var tableView: UITableView!
     private let refreshControl = UIRefreshControl()
     
     override func viewDidLoad() {

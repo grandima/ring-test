@@ -56,7 +56,7 @@ extension TableViewCell: PostCellView {
         imageTapAction = shortAction
         imgView.image = image
     }
-    func setup(with image: UIImage?) {
+    func update(with image: UIImage?) {
         if let image = image {
             imgView.image = image
             imgView.isHidden = false

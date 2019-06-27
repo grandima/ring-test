@@ -8,11 +8,19 @@
 
 import UIKit
 
-protocol PostsView: class {
-    func update()
-    func getCellView(at index: Int) -> PostCellView?
-    func presentSharingExtension(for image: UIImage)
-    func open(url: URL)
+protocol PostsPresenter: class {
+    var numberOfRows: Int { get }
+    func load()
+    func configure(cell: PostCellView, for index: Int)
+    func viewWillAppear()
+    
+    func willDisplayCell(at index: Int)
+    func prefetch(for indices: [Int])
+    func cancelPrefetching(for indices: [Int])
+    func getEncodedData(with lastVisibleIndex: Int?) -> Data?
+    func decode(data: Data)
+    var lastVisibleRow: Int? { get }
+    
 }
 
 final class PostsPresenterImpl {
@@ -147,7 +155,7 @@ extension PostsPresenterImpl: PostViewModelDelegate {
     func didUpdateImage(for post: PostViewModel) {
         if let index = result.posts.firstIndex(of: post),
             let cell = view?.getCellView(at: index) {
-            cell.setup(with: result.posts[index].image)
+            cell.update(with: result.posts[index].image)
         }
     }
 }
